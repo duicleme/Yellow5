@@ -33,6 +33,7 @@ HRESULT Warp::Init(IDirect3DDevice9* Device)
 
 	HRESULT hr = D3DXCreateCylinder(Device, 0.05f, 0.05f, 1.0f, 12, 1, &SunLineMesh, nullptr);
 
+
 	return hr;
 }
 
