@@ -52,6 +52,10 @@ D3DXVECTOR3 travelEnd;
 
 const float travelStartDistance = 10.0f;
 
+LPD3DXMESH mesh = nullptr;
+LPDIRECT3DTEXTURE9 wingTexture = nullptr;
+
+
 
 
 void UpdateCameraTravel(float timeDelta)
@@ -169,6 +173,35 @@ bool Setup()
 	WarpLine.Init(Device);
 
 
+	//===========================================================================
+	
+	// 비행기 메시 로드
+	HRESULT hr = D3DXLoadMeshFromXA(
+		"X-Wing.x",
+		D3DXMESH_MANAGED,
+		Device,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		&mesh
+	);
+
+	if (FAILED(hr))
+		return false;
+
+	// 비행기 텍스처 로드
+	hr = D3DXCreateTextureFromFileA(
+		Device,
+		"X-Wing_BaseColor.png",
+		&wingTexture
+	);
+
+	if (FAILED(hr))
+		return false;
+
+
+	//===================================================================================
 
 
 
@@ -179,11 +212,30 @@ bool Setup()
 void Cleanup()
 {
 
-	sqlite3_close(db);
+	
+	if (wingTexture)
+	{
+		wingTexture->Release();
+		wingTexture = nullptr;
+	}
+
+	if (mesh)
+	{
+		mesh->Release();
+		mesh = nullptr;
+	}
 
 
+
+
+
+
+	if (db)
+	{
+		sqlite3_close(db);
+		db = nullptr;
+	}
 }
-
 
 
 
@@ -308,6 +360,77 @@ bool Display(float timeDelta)
 		{
 			WarpLine.DrawSunLine(Device, Sun, Sun2);
 		}
+
+		
+
+
+
+
+
+		if (mesh && wingTexture)
+		{
+			D3DXMATRIX S, T, World;
+
+			// 크기
+			D3DXMatrixScaling(&S, 0.5f, 0.5f, 0.5f);
+
+			// 위치
+			D3DXMatrixTranslation(&T, 0.0f, 10.0f, 0.0f);
+
+			World = S * T;
+
+			Device->SetTransform(D3DTS_WORLD, &World);
+
+			// 렌더링 설정
+			Device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+			Device->SetRenderState(D3DRS_LIGHTING, FALSE);
+
+			Device->SetTextureStageState(
+				0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
+
+			Device->SetTextureStageState(
+				0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+
+			Device->SetTextureStageState(
+				0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+
+			Device->SetTexture(0, wingTexture);
+
+			// 비행기 그리기
+			mesh->DrawSubset(0);
+
+			Device->SetTexture(0, nullptr);
+
+			// 다른 행성 렌더링을 위한 상태 복구
+			Device->SetTextureStageState(
+				0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+
+			Device->SetTextureStageState(
+				0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+
+			Device->SetTextureStageState(
+				0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+
+			Device->SetTextureStageState(
+				0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+
+			Device->SetTextureStageState(
+				0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+
+			Device->SetTextureStageState(
+				0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+
+			Device->SetRenderState(D3DRS_LIGHTING, TRUE);
+		}
+
+
+		
+
+
+
+
+
+
 
 		Device->EndScene();
 		Device->Present(0, 0, 0, 0);
