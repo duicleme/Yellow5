@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Yellow5.vcxproj" Id="d41c1c66-40b0-4941-a045-52d957c38383" />
+</Solution>
