@@ -159,6 +159,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="X-Wing.x" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="X-Wing_BaseColor.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
